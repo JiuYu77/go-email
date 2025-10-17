@@ -70,3 +70,14 @@ func (l LogLevel) UpperString() string {
 		return fmt.Sprintf("LOGLEVEL(%d)", l)
 	}
 }
+
+var (
+	_levelToColor = map[LogLevel]Style{
+		DebugLevel: Cyan,    // 青色
+		InfoLevel:  Green,   // 绿色
+		WarnLevel:  Yellow,  // 黄色
+		ErrorLevel: Red,     // 红色
+		PanicLevel: Red,     // 红色
+		FatalLevel: Magenta, // 紫色
+	}
+)

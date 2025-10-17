@@ -43,10 +43,14 @@ var (
 	GenerateSecureCode  = verifier.GenerateSecureCode
 	GenerateNumberCode  = verifier.GenerateNumberCode
 	GenerateRandomToken = verifier.GenerateRandomToken
-	Numbers             = verifier.Numbers
-	UpperLetters        = verifier.UpperLetters
-	LowerLetters        = verifier.LowerLetters
-	AlphaNumeric        = verifier.AlphaNumeric
 	// cache
 	NewCache = cache.NewCache[cache.CacheValue]
+)
+
+const (
+	// verifier
+	Numbers      = verifier.Numbers
+	UpperLetters = verifier.UpperLetters
+	LowerLetters = verifier.LowerLetters
+	AlphaNumeric = verifier.AlphaNumeric
 )

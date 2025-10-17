@@ -12,7 +12,7 @@ func TestLogx(t *testing.T) {
 	logger := logx.NewLogger(os.Stdout, logx.DebugLevel)
 	logger.EnableColor()
 	logger.EnableTime()
-	logger.DisableLocation()
+	// logger.DisableLocation()
 
 	logger.Debug("123\n", 334)
 

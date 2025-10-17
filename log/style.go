@@ -62,6 +62,7 @@ func (s Style) Add(str string) string {
 }
 
 // 为字符串一次添加多个样式
+// opts {...Style}
 func AddStyle(s string, opts ...Style) string {
 	if len(opts) == 0 {
 		return s

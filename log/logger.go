@@ -50,6 +50,13 @@ func (l *Logger) SetLevel(level LogLevel) {
 	l.level = level
 }
 
+// 设置调用深度
+func (l *Logger) SetCallDepth(depth int) {
+	l.mtx.Lock()
+	defer l.mtx.Unlock()
+	l.callDepth = depth
+}
+
 // 获取颜色代码
 func (l *Logger) getColor(level LogLevel) Style {
 	if !l.withColor {
@@ -72,7 +79,6 @@ func (l *Logger) output(level LogLevel, format string, v ...any) {
 	var location string
 	if l.withLocation {
 		_, file, line, ok := runtime.Caller(l.callDepth)
-		// _, file, line, ok = runtime.Caller(l.callDepth)
 		if !ok {
 			file = "???"
 			line = 0

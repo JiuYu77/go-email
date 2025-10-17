@@ -24,6 +24,7 @@ type (
 	Cache[T CacheValue] = cache.Cache[T]
 )
 
+// function
 var (
 	// SMTP
 	NewSMTP        = smtp.NewSMTP

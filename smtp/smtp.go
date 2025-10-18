@@ -86,7 +86,7 @@ func (s *SMTP) tlsCfg() *tls.Config {
 //	{*SMTPSender} 发送邮件的结构体指针
 //	{error} nil 表示成功
 func (s *SMTP) Dial() (*SMTPSender, error) {
-	utils.Logger.Debugln(utils.LogPrefix, "Dial() start.")
+	utils.Logger.Debugln(utils.LogPrefix, "SMTP Dial() start.")
 	conn, err := net.DialTimeout("tcp", addr(s.host, s.port), 10*time.Second)
 	if err != nil {
 		utils.Logger.Errorln(utils.LogPrefix, err)
@@ -99,11 +99,13 @@ func (s *SMTP) Dial() (*SMTPSender, error) {
 
 	client, err := smtp.NewClient(conn, s.host)
 	if err != nil {
+		utils.Logger.Errorln(utils.LogPrefix, err)
 		return nil, err
 	}
 
 	if s.LocalName != "" {
 		if err := client.Hello(s.LocalName); err != nil {
+			utils.Logger.Errorln(utils.LogPrefix, err)
 			return nil, err
 		}
 	}
@@ -112,6 +114,7 @@ func (s *SMTP) Dial() (*SMTPSender, error) {
 		if ok, _ := client.Extension("STARTTLS"); ok {
 			if err := client.StartTLS(s.tlsCfg()); err != nil {
 				client.Close()
+				utils.Logger.Errorln(utils.LogPrefix, err)
 				return nil, err
 			}
 		}
@@ -123,19 +126,23 @@ func (s *SMTP) Dial() (*SMTPSender, error) {
 			switch {
 			case strings.Contains(auth, "CRAM-MD5"):
 				s.auth = smtp.CRAMMD5Auth(s.username, s.password)
-			case strings.Contains(auth, "XOAUTH2"):
+				utils.Logger.Debugln(utils.LogPrefix, "CRAM-MD5 auth")
+			case strings.Contains(auth, "XOAUTH2") && !strings.Contains(auth, "PLAIN"):
 				s.auth = &xoauth2Auth{
 					username: s.username,
 					token:    s.password,
 				}
+				utils.Logger.Debugln(utils.LogPrefix, "XOAUTH2 auth")
 			case strings.Contains(auth, "LOGIN") && !strings.Contains(auth, "PLAIN"):
 				s.auth = &loginAuth{
 					username: s.username,
 					password: s.password,
 					host:     s.host,
 				}
+				utils.Logger.Debugln(utils.LogPrefix, "LOGIN auth")
 			default:
 				s.auth = smtp.PlainAuth("", s.username, s.password, s.host)
+				utils.Logger.Debugln(utils.LogPrefix, "Plain auth")
 			}
 		}
 	}
@@ -143,6 +150,7 @@ func (s *SMTP) Dial() (*SMTPSender, error) {
 	if s.auth != nil { // 认证
 		if err = client.Auth(s.auth); err != nil {
 			client.Close()
+			utils.Logger.Errorln(utils.LogPrefix, err)
 			return nil, err
 		}
 	}

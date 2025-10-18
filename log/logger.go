@@ -151,13 +151,13 @@ func (l *Logger) output(level LogLevel, format string, v ...any) {
 		msg = fmt.Sprintf(format, v...)
 	}
 
-	levelStr := "[" + level.String() + "]"
+	levelStr := level.String()
 	if color != Reset {
 		levelStr = color.Add(levelStr)
 	}
 
 	// 构建完整日志行
-	logLine := fmt.Sprintf("%s%s%s %s",
+	logLine := fmt.Sprintf("%s[%s]%s %s",
 		now, levelStr, location, msg)
 
 	// 输出到 writer

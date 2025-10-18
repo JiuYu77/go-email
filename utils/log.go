@@ -15,7 +15,7 @@ func init() {
 	if os.Getenv("GO_EMAIL_MODE") == "" {
 		Logger = logx.NewLogger(os.Stdout, logx.DebugLevel)
 	} else {
-		Logger = logx.NewLogger(os.Stdout, logx.InfoLevel)
+		Logger = logx.NewLogger(os.Stdout, logx.PanicLevel)
 	}
 	Logger.EnableColor()
 	Logger.SetLocation(1)

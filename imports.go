@@ -2,7 +2,9 @@ package goemail
 
 import (
 	"github.com/JiuYu77/go-email/cache"
+	logx "github.com/JiuYu77/go-email/log"
 	"github.com/JiuYu77/go-email/smtp"
+	"github.com/JiuYu77/go-email/utils"
 	"github.com/JiuYu77/go-email/verifier"
 )
 
@@ -46,6 +48,8 @@ var (
 	GenerateRandomToken = verifier.GenerateRandomToken
 	// cache
 	NewCache = cache.NewCache[cache.CacheValue]
+	// log
+	SetMode = utils.SetMode
 )
 
 const (
@@ -54,4 +58,7 @@ const (
 	UpperLetters = verifier.UpperLetters
 	LowerLetters = verifier.LowerLetters
 	AlphaNumeric = verifier.AlphaNumeric
+	// log
+	DebugMode   = logx.DebugLevel
+	ReleaseMode = logx.FatalLevel + 1
 )

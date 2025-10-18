@@ -6,6 +6,8 @@ import (
 	"net/smtp"
 	"strings"
 	"time"
+
+	"github.com/JiuYu77/go-email/utils"
 )
 
 type SMTP struct {
@@ -84,8 +86,10 @@ func (s *SMTP) tlsCfg() *tls.Config {
 //	{*SMTPSender} 发送邮件的结构体指针
 //	{error} nil 表示成功
 func (s *SMTP) Dial() (*SMTPSender, error) {
+	utils.Logger.Debugln(utils.LogPrefix, "Dial() start.")
 	conn, err := net.DialTimeout("tcp", addr(s.host, s.port), 10*time.Second)
 	if err != nil {
+		utils.Logger.Errorln(utils.LogPrefix, err)
 		return nil, err
 	}
 

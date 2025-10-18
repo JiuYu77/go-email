@@ -9,6 +9,8 @@ import (
 )
 
 func Test_smtp_sender(t *testing.T) {
+	// goemail.SetMode(goemail.ReleaseMode) // 禁用调试信息
+
 	msg := goemail.NewMessage()
 	es := []string{email}
 	es = append(es, msg.FormatAddress(email2, "123多个"))

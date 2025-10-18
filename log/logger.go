@@ -11,13 +11,23 @@ import (
 )
 
 type Logger struct {
-	mtx          sync.Mutex
-	out          io.Writer
-	level        LogLevel
-	withColor    bool
-	withTime     bool
-	withLocation bool
+	mtx       sync.Mutex
+	out       io.Writer
+	level     LogLevel
+	withColor bool
+	withTime  bool
+	// 小于0 不带位置信息，0 文件名:行号，1 绝对路径:行号，大于1 文件名:行号
+	withLocation int
 	callDepth    int
+
+	mtx2          sync.Mutex
+	marshalIndent bool // 带格式json, 美化
+
+	withRotation bool
+	filename     string
+	maxSize      int64 // 文件最大容量 字节(byte)
+	maxBackups   int   // 最大备份数
+	currentSize  int64
 }
 
 // NewLogger 创建新日志器
@@ -27,8 +37,8 @@ func NewLogger(out io.Writer, level LogLevel) *Logger {
 		level:        level,
 		withColor:    false,
 		withTime:     false,
-		withLocation: true,
-		callDepth:    2,
+		withLocation: 0,
+		callDepth:    3,
 	}
 }
 
@@ -39,8 +49,10 @@ func (l *Logger) EnableColor() {
 func (l *Logger) EnableTime() {
 	l.withTime = true
 }
-func (l *Logger) DisableLocation() {
-	l.withLocation = false
+func (l *Logger) SetLocation(lct int) {
+	l.mtx.Lock()
+	defer l.mtx.Unlock()
+	l.withLocation = lct
 }
 
 // 设置日志级别
@@ -66,6 +78,26 @@ func (l *Logger) getColor(level LogLevel) Style {
 	return level_color
 }
 
+// 获取调用者信息(调用位置)
+func (l *Logger) getLocation() (file string, line int) {
+	var ok bool
+	_, file, line, ok = runtime.Caller(l.callDepth)
+	if !ok {
+		file = "???"
+		line = 0
+	} else {
+		switch l.withLocation {
+		case 0:
+			file = filepath.Base(file) // 文件名
+		case 1:
+			// 绝对路径
+		default:
+			file = filepath.Base(file)
+		}
+	}
+	return file, line
+}
+
 // 输出日志
 func (l *Logger) output(level LogLevel, format string, v ...any) {
 	if level < l.level {
@@ -77,21 +109,15 @@ func (l *Logger) output(level LogLevel, format string, v ...any) {
 
 	// 获取调用者信息
 	var location string
-	if l.withLocation {
-		_, file, line, ok := runtime.Caller(l.callDepth)
-		if !ok {
-			file = "???"
-			line = 0
-		} else {
-			file = filepath.Base(file)
-		}
+	if l.withLocation >= 0 {
+		file, line := l.getLocation()
 		location = fmt.Sprintf(" %s:%d", file, line)
 	}
 
 	// 格式化时间
 	now := ""
 	if l.withTime {
-		now = time.Now().Format("2006-01-02 15:04:05.000") + " "
+		now = time.Now().Format(DateTime) + " "
 	}
 
 	color := l.getColor(level)
@@ -107,9 +133,14 @@ func (l *Logger) output(level LogLevel, format string, v ...any) {
 		msg = fmt.Sprintf(format, v...)
 	}
 
+	levelStr := "[" + level.String() + "]"
+	if color != Reset {
+		levelStr = color.Add(levelStr)
+	}
+
 	// 构建完整日志行
 	logLine := fmt.Sprintf("%s%s%s %s",
-		now, color.Add("["+level.String()+"]"), location, msg)
+		now, levelStr, location, msg)
 
 	// 输出到 writer
 	l.out.Write([]byte(logLine))

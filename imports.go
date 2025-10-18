@@ -60,5 +60,5 @@ const (
 	AlphaNumeric = verifier.AlphaNumeric
 	// log
 	DebugMode   = logx.DebugLevel
-	ReleaseMode = logx.FatalLevel + 1
+	ReleaseMode = logx.PanicLevel
 )

@@ -27,6 +27,7 @@ func NewJsonLogger(out io.Writer, level LogLevel) *Logger {
 		withLocation:  0,
 		callDepth:     4,
 		marshalIndent: false,
+		timeFormat:    time.RFC3339, // default
 	}
 }
 
@@ -55,7 +56,7 @@ func (l *Logger) outputJSON(level LogLevel, message string, fields Fields) {
 
 	// 构建日志条目
 	entry := LogEntry{
-		Timestamp: time.Now().Format(time.RFC3339),
+		Timestamp: now_str(l.timeFormat),
 		Level:     level.String(),
 		Message:   message,
 		Fields:    fields,
@@ -70,18 +71,16 @@ func (l *Logger) outputJSON(level LogLevel, message string, fields Fields) {
 	jsonData, err := l.Marshal(entry)
 	if err != nil {
 		// 如果 JSON 序列化失败，回退到普通文本输出
-		l.callDepth += 1 // callDepth 调用深度增加1
+		l.SetCallDepth(1) // callDepth 调用深度增加1
 		l.output(level, "JSON marshal error: %v\n", err)
-		l.callDepth -= 1 // 恢复
+		l.SetCallDepth(-1) // 恢复
 		return
 	}
 
 	if l.withRotation { // Log Rotation
 		if l.currentSize+int64(len(jsonData)) > l.maxSize {
 			if err := l.rotate(); err != nil {
-				l.callDepth += 1 // callDepth 调用深度增加1
 				l.output(level, "logger rotate error: %v\n", err)
-				l.callDepth -= 1 // 恢复
 				return
 			}
 		}
@@ -93,11 +92,9 @@ func (l *Logger) outputJSON(level LogLevel, message string, fields Fields) {
 
 	if l.withRotation { // Log Rotation
 		l.currentSize += int64(n)
-		if err != nil {
-			l.callDepth += 1 // callDepth 调用深度增加1
-			l.output(level, "logger write error: %v\n", err)
-			l.callDepth -= 1 // 恢复
-		}
+	}
+	if err != nil {
+		l.output(level, "logger write error: %v\n", err)
 	}
 }
 

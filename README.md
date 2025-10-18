@@ -154,3 +154,17 @@ func main() {
 	}
 }
 ```
+
+## logx
+
+### 简介
+
+此部分源码，请查看[代码目录](log/)。
+
+- [**NewLogger**](log/logger.go)
+- [**NewJsonLogger**](log/json.go) JSON日志（JSON格式的日志）
+- [**NewJsonRotation**](log/rotation.go) JSON日志，日志轮转（基于文件大小）
+
+### 示例 Example
+
+更多内容请查看：[**logx测试**](test/logx_test.go)

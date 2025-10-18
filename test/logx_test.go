@@ -29,7 +29,7 @@ func TestLogx(t *testing.T) {
 	// logger.Panicln(123, 334)
 	// logger.Fatalln(123, 334)
 
-	logger.SetCallDepth(3)
+	logger.SetCallDepth(1)
 	logger.SetPrettyPrint(true)
 
 	logger.DebugJson("This is a json data.", nil)
@@ -54,7 +54,7 @@ func TestLogxFile(t *testing.T) {
 	}
 
 	// logger := logx.NewLogger(file, logx.DebugLevel)
-	// logger.SetCallDepth(4)
+	// logger.SetCallDepth(1)
 
 	logger := logx.NewJsonLogger(file, logx.DebugLevel)
 	// logger := logx.NewJsonLogger(file, logx.InfoLevel)

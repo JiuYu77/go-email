@@ -7,7 +7,6 @@ import (
 	"path/filepath"
 	"runtime"
 	"sync"
-	"time"
 )
 
 type Logger struct {
@@ -19,6 +18,7 @@ type Logger struct {
 	// 小于0 不带位置信息，0 文件名:行号，1 绝对路径:行号，大于1 文件名:行号
 	withLocation int
 	callDepth    int
+	timeFormat   string
 
 	mtx2          sync.Mutex
 	marshalIndent bool // 带格式json, 美化
@@ -42,13 +42,34 @@ func NewLogger(out io.Writer, level LogLevel) *Logger {
 	}
 }
 
-// 启用颜色输出
+// getColor 获取颜色代码
+//
+//	仅供 NewLogger 创建的对象使用。
+func (l *Logger) getColor(level LogLevel) Style {
+	if !l.withColor {
+		return Reset
+	}
+	level_color := _levelToColor[level]
+	return level_color
+}
+
+// EnableColor 启用颜色输出。
+//
+//	仅供 NewLogger 创建的对象使用。
 func (l *Logger) EnableColor() {
 	l.withColor = true
 }
+
+// EnableTime
+//
+//	仅供 NewLogger 创建的对象使用。
 func (l *Logger) EnableTime() {
 	l.withTime = true
 }
+
+// SetLocation
+//
+//	仅供 NewLogger 创建的对象使用。
 func (l *Logger) SetLocation(lct int) {
 	l.mtx.Lock()
 	defer l.mtx.Unlock()
@@ -66,16 +87,13 @@ func (l *Logger) SetLevel(level LogLevel) {
 func (l *Logger) SetCallDepth(depth int) {
 	l.mtx.Lock()
 	defer l.mtx.Unlock()
-	l.callDepth = depth
+	l.callDepth += depth
 }
 
-// 获取颜色代码
-func (l *Logger) getColor(level LogLevel) Style {
-	if !l.withColor {
-		return Reset
-	}
-	level_color := _levelToColor[level]
-	return level_color
+// 设置自定义时间格式
+func (l *Logger) SetTimeFormat(format string) {
+	// 自定义时间格式
+	l.timeFormat = format
 }
 
 // 获取调用者信息(调用位置)
@@ -117,7 +135,7 @@ func (l *Logger) output(level LogLevel, format string, v ...any) {
 	// 格式化时间
 	now := ""
 	if l.withTime {
-		now = time.Now().Format(DateTime) + " "
+		now = now_str(l.timeFormat) + " "
 	}
 
 	color := l.getColor(level)

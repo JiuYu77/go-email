@@ -8,7 +8,7 @@ import (
 
 var (
 	Logger    *logx.Logger
-	LogPrefix = "[go-email]"
+	LogPrefix = "[go-email] "
 )
 
 func init() {
@@ -17,4 +17,6 @@ func init() {
 	} else {
 		Logger = logx.NewLogger(os.Stdout, logx.InfoLevel)
 	}
+	Logger.EnableColor()
+	Logger.SetLocation(1)
 }

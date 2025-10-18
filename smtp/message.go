@@ -248,7 +248,7 @@ func (m *Message) appendFile(list []*file, name string, settings []FileSetting) 
 
 	f := &file{
 		Name:   filepath.Base(name),
-		Header: make(map[string][]string),
+		Header: make(header),
 		CopyFunc: func(w io.Writer) error {
 			h, err := os.Open(name)
 			if err != nil {

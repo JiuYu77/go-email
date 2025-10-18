@@ -20,3 +20,7 @@ func init() {
 	Logger.EnableColor()
 	Logger.SetLocation(1)
 }
+
+func SetMode(mode logx.LogLevel) {
+	Logger.SetLevel(mode)
+}

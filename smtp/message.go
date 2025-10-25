@@ -12,7 +12,7 @@ import (
 )
 
 type Message struct {
-	header      header  // 邮件头信息
+	header      Header  // 邮件头信息
 	parts       []*part // 正文部分
 	attachments []*file // 附件部分
 	embedded    []*file // 内联资源部分
@@ -25,7 +25,7 @@ type Message struct {
 
 func NewMessage(settings ...MessageSetting) *Message {
 	m := &Message{
-		header:   make(header),
+		header:   make(Header),
 		charset:  "UTF-8",
 		encoding: QuotedPrintable,
 	}
@@ -210,7 +210,7 @@ func (m *Message) setHeader(key string, value ...string) {
 
 // SetBody 设置邮件正文
 func (m *Message) SetBody(contentType, body string, settings ...PartSetting) {
-	m.parts = []*part{Part(contentType, Copier(body), m.encoding, settings)}
+	m.parts = []*part{Part(contentType, NewCopier(body), m.encoding, settings)}
 }
 
 func (m *Message) encodeString(value string) string {
@@ -248,7 +248,7 @@ func (m *Message) appendFile(list []*file, name string, settings []FileSetting) 
 
 	f := &file{
 		Name:   filepath.Base(name),
-		Header: make(header),
+		Header: make(Header),
 		CopyFunc: func(w io.Writer) error {
 			h, err := os.Open(name)
 			if err != nil {
@@ -300,7 +300,7 @@ func (m *Message) Embed(filename string, settings ...FileSetting) error {
 // the end of the message. So the plain text part should be added before the
 // HTML part. See http://en.wikipedia.org/wiki/MIME#Alternative
 func (m *Message) AddAlternative(contentType, body string, settings ...PartSetting) {
-	m.AddAlternativeWriter(contentType, Copier(body), settings...)
+	m.AddAlternativeWriter(contentType, NewCopier(body), settings...)
 }
 
 // AddAlternativeWriter adds an alternative part to the message. It can be

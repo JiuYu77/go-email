@@ -20,8 +20,8 @@ type SMTPConfig struct {
 	From     string `json:"from"`          // 发件人邮箱地址
 }
 
-type header = textproto.MIMEHeader
-type copier func(io.Writer) error
+type Header = textproto.MIMEHeader // map[string][]string
+type Copier func(io.Writer) error
 type Encoding string
 
 // A MessageSetting can be used as an argument in NewMessage to configure an
@@ -46,9 +46,16 @@ const (
 	qEncoding = mime.QEncoding
 )
 
+func NewCopier(s string) Copier {
+	return func(w io.Writer) error {
+		_, err := io.WriteString(w, s) // 闭包捕获了 s
+		return err
+	}
+}
+
 type part struct {
 	contentType string
-	copier      copier
+	copier      Copier
 	encoding    Encoding
 }
 
@@ -57,7 +64,7 @@ type part struct {
 // added to a message.
 type PartSetting func(*part)
 
-func Part(contentType string, f copier, encoding Encoding, settings []PartSetting) *part {
+func Part(contentType string, f Copier, encoding Encoding, settings []PartSetting) *part {
 	part := &part{
 		contentType: contentType,
 		copier:      f,
@@ -67,12 +74,6 @@ func Part(contentType string, f copier, encoding Encoding, settings []PartSettin
 		s(part)
 	}
 	return part
-}
-func Copier(s string) func(io.Writer) error {
-	return func(w io.Writer) error {
-		_, err := io.WriteString(w, s) // 闭包捕获了 s
-		return err
-	}
 }
 
 // SetPartEncoding sets the encoding of the part added to the message. By
@@ -85,8 +86,8 @@ func SetPartEncoding(e Encoding) PartSetting {
 
 type file struct {
 	Name     string
-	Header   header
-	CopyFunc copier
+	Header   Header
+	CopyFunc Copier
 }
 
 func (f *file) setHeader(field, value string) {
@@ -101,7 +102,7 @@ type FileSetting func(*file)
 //
 // Mandatory headers are automatically added if they are not set when sending
 // the email.
-func SetHeader(h map[string][]string) FileSetting {
+func SetHeader(h Header) FileSetting {
 	return func(f *file) {
 		for k, v := range h {
 			f.Header[k] = v

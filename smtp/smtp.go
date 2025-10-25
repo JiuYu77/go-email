@@ -10,6 +10,8 @@ import (
 	"github.com/JiuYu77/go-email/utils"
 )
 
+type Client = smtp.Client
+
 type SMTP struct {
 	// Host represents the host of the SMTP server.
 	host string

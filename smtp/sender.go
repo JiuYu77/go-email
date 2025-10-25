@@ -11,14 +11,15 @@ import (
 
 // SMTPSender 一个邮件发送客户端。
 type SMTPSender struct {
-	client *smtp.Client
+	// client  *smtp.Client
+	client *Client
 	smtp   *SMTP
 }
 
 func NewSMTPSender(smtp *SMTP) *SMTPSender {
 	return &SMTPSender{smtp: smtp}
 }
-func NewSMTPSender1(client *smtp.Client, smtp *SMTP) *SMTPSender {
+func NewSMTPSender1(client *Client, smtp *SMTP) *SMTPSender {
 	return &SMTPSender{client: client, smtp: smtp}
 }
 

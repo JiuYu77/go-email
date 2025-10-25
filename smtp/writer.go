@@ -22,7 +22,7 @@ type MessageWriter struct {
 }
 
 // createPart 创建 multipart.Writer 部分
-func (w *MessageWriter) createPart(h header) {
+func (w *MessageWriter) createPart(h Header) {
 	w.partWriter, w.err = w.writers[w.depth-1].CreatePart(h)
 }
 
@@ -143,7 +143,7 @@ func (w *MessageWriter) writeHeader(key string, value ...string) {
 	w.writeString("\r\n")
 }
 
-func (w *MessageWriter) writeHeaders(h header) {
+func (w *MessageWriter) writeHeaders(h Header) {
 	if w.depth == 0 {
 		for k, v := range h {
 			if k != "Bcc" {

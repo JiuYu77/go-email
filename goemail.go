@@ -24,6 +24,7 @@ type (
 	Header         = smtp.Header
 	// verifier
 	Config           = verifier.Config
+	Verifier         = verifier.Verifier
 	VerificationCode = verifier.VerificationCode
 	Buildler         = verifier.Buildler
 	// cache
